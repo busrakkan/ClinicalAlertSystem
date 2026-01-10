@@ -5,12 +5,14 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        BlockingQueue<Alert> alertQueue = new LinkedBlockingQueue<>();
+        PriorityBlockingQueue<Alert> alertQueue = new PriorityBlockingQueue<>();
+
 
         List<HospitalRoom> rooms = List.of(
                 new HospitalRoom("ICU-01", 18.0, 24.0),

@@ -23,13 +23,18 @@ public class TemperatureSensorTask implements Runnable {
                 TemperatureReading reading =
                         new TemperatureReading(room.getRoomId(), temperature);
 
-                if (room.isReadingUnsafe(reading)) {
-                    Alert alert = new Alert(
-                            room.getRoomId(),
-                            temperature,
-                            AlertSeverity.HIGH
-                    );
-                    alertQueue.put(alert); // thread-safe
+                AlertSeverity severity = null;
+
+                // Use room’s min/max for severity calculation
+                if (temperature > room.getMaxTemperature() + 5 || temperature < room.getMinTemperature() - 5) {
+                    severity = AlertSeverity.CRITICAL;
+                } else if (temperature > room.getMaxTemperature() || temperature < room.getMinTemperature()) {
+                    severity = AlertSeverity.HIGH;
+                }
+
+                // Only produce an alert if necessary
+                if (severity != null) {
+                    alertQueue.put(new Alert(room.getRoomId(), temperature, severity));
                 }
 
                 Thread.sleep(2000); // simulate sensor delay

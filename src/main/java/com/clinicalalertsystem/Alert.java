@@ -2,7 +2,7 @@ package com.clinicalalertsystem;
 
 import java.time.Instant;
 
-public class Alert {
+public class Alert implements Comparable<Alert> {
 
     private final String roomId;
     private final double temperature;
@@ -14,6 +14,23 @@ public class Alert {
         this.temperature = temperature;
         this.severity = severity;
         this.timestamp = Instant.now();
+    }
+
+        public AlertSeverity getSeverity() {
+        return severity;
+    }
+
+    @Override
+    public int compareTo(Alert other) {
+        return this.severity.ordinal() - other.severity.ordinal();
+    }
+
+    @Override
+    public String toString() {
+        return "[ALERT] Room: " + roomId +
+               " | Temp: " + temperature +
+               "°C | Severity: " + severity +
+               " | Time: " + timestamp;
     }
 
     public String getRoomId() {
@@ -28,7 +45,4 @@ public class Alert {
         return timestamp;
     }
 
-    public AlertSeverity getSeverity() {
-        return severity;
-    }
 }

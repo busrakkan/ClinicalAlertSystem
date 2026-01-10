@@ -1,7 +1,8 @@
 package com.clinicalalertsystem;
 
 public enum AlertSeverity {
-    LOW,
+    CRITICAL,
+    HIGH,
     MEDIUM,
-    HIGH
+    LOW
 }

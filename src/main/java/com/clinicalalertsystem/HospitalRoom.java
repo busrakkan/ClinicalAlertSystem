@@ -20,6 +20,14 @@ public class HospitalRoom {
         return temperature < minTemperature || temperature > maxTemperature;
     }
 
+    public double getMinTemperature() {
+        return minTemperature;
+    }
+
+    public double getMaxTemperature() {
+        return maxTemperature;
+    }
+
     public boolean isReadingUnsafe(TemperatureReading reading) {
         if (!roomId.equals(reading.getRoomId())) {
             throw new IllegalArgumentException("TemperatureReading does not belong to this room");

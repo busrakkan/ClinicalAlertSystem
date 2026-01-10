@@ -17,19 +17,23 @@ public class Main {
                 new HospitalRoom("WARD-01", 16.0, 26.0)
         );
 
-        ExecutorService executor = Executors.newFixedThreadPool(rooms.size() + 1);
+        ExecutorService sensorExecutor = Executors.newFixedThreadPool(rooms.size());
+
+        ExecutorService dispatcherExecutor = Executors.newSingleThreadExecutor();
+
 
         // Start sensor tasks
         for (HospitalRoom room : rooms) {
-            executor.submit(new TemperatureSensorTask(room, alertQueue));
+            sensorExecutor.submit(new TemperatureSensorTask(room, alertQueue));
         }
 
         // Start notification dispatcher
-        executor.submit(new NotificationDispatcher(alertQueue));
+        dispatcherExecutor.submit(new NotificationDispatcher(alertQueue));
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down ClinicalAlertSystem...");
-            executor.shutdownNow();
+            sensorExecutor.shutdownNow();
+            dispatcherExecutor.shutdownNow();
         }));
     }
 }

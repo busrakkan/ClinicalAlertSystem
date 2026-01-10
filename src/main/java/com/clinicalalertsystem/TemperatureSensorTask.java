@@ -16,41 +16,38 @@ public class TemperatureSensorTask implements Runnable {
 
     @Override
     public void run() {
-        try {
-            while (!Thread.currentThread().isInterrupted()) {
-
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
                 double temperature = generateTemperature();
-                TemperatureReading reading =
-                        new TemperatureReading(room.getRoomId(), temperature);
 
                 AlertSeverity severity = null;
 
-                // Use room’s min/max for severity calculation
-                if (temperature > room.getMaxTemperature() + 5 || temperature < room.getMinTemperature() - 5) {
+                if (temperature > room.getMaxTemperature() + 5 ||
+                    temperature < room.getMinTemperature() - 5) {
                     severity = AlertSeverity.CRITICAL;
-                } else if (temperature > room.getMaxTemperature() || temperature < room.getMinTemperature()) {
+                } else if (temperature > room.getMaxTemperature() ||
+                           temperature < room.getMinTemperature()) {
                     severity = AlertSeverity.HIGH;
                 }
 
-                // Only produce an alert if necessary
                 if (severity != null) {
                     alertQueue.put(new Alert(room.getRoomId(), temperature, severity));
                 }
 
-                Thread.sleep(2000); // simulate sensor delay
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+                Thread.sleep(2000);
 
-        // Avoid thread from dying silently
-        catch (Exception e) {
-            System.err.println("Sensor failure in room " + room.getRoomId()
-                    + ": " + e.getMessage());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // graceful shutdown
+            } catch (Exception e) {
+                System.err.println(
+                    "Sensor failure in room " + room.getRoomId() + ": " + e.getMessage()
+                );
+                // loop continues → fault isolated
+            }
         }
     }
 
     private double generateTemperature() {
-        return 15 + random.nextDouble() * 20; // 15°C to 35°C
+        return 15 + random.nextDouble() * 20;
     }
 }

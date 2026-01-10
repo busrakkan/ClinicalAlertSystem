@@ -9,7 +9,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-        PriorityBlockingQueue<Alert> alertQueue = new PriorityBlockingQueue<>();
+        PriorityBlockingQueue<Alert> alertQueue = new PriorityBlockingQueue<>(100);
+
 
         List<HospitalRoom> rooms = List.of(
                 new HospitalRoom("ICU-01", 18.0, 24.0),

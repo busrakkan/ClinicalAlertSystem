@@ -31,7 +31,12 @@ public class TemperatureSensorTask implements Runnable {
                 }
 
                 if (severity != null) {
-                    alertQueue.put(new Alert(room.getRoomId(), temperature, severity));
+                    // replaced alertQueue.put() with alertQueue.offer()
+                    boolean accepted = alertQueue.offer(new Alert(room.getRoomId(), temperature, severity));
+                    if (!accepted) {
+                        System.err.println("Alert dropped due to full queue in room " + room.getRoomId());
+                    }
+
                 }
 
                 Thread.sleep(2000);

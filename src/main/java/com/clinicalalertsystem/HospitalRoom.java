@@ -19,4 +19,11 @@ public class HospitalRoom {
     public boolean isTemperatureOutOfRange(double temperature) {
         return temperature < minTemperature || temperature > maxTemperature;
     }
+
+    public boolean isReadingUnsafe(TemperatureReading reading) {
+        if (!roomId.equals(reading.getRoomId())) {
+            throw new IllegalArgumentException("TemperatureReading does not belong to this room");
+        }
+        return isTemperatureOutOfRange(reading.getTemperature());
+    }
 }

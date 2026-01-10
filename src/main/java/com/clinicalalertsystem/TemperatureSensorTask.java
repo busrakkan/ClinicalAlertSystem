@@ -42,6 +42,12 @@ public class TemperatureSensorTask implements Runnable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+
+        // Avoid thread from dying silently
+        catch (Exception e) {
+            System.err.println("Sensor failure in room " + room.getRoomId()
+                    + ": " + e.getMessage());
+        }
     }
 
     private double generateTemperature() {

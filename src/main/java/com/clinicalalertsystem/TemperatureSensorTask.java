@@ -2,12 +2,17 @@ package com.clinicalalertsystem;
 
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Logger;
+import com.clinicalalertsystem.logging.LogManager;
+
 
 public class TemperatureSensorTask implements Runnable {
 
     private final HospitalRoom room;
     private final BlockingQueue<Alert> alertQueue;
     private final Random random = new Random();
+    private static final Logger logger = LogManager.getLogger(TemperatureSensorTask.class);
+
 
     public TemperatureSensorTask(HospitalRoom room, BlockingQueue<Alert> alertQueue) {
         this.room = room;
@@ -19,6 +24,8 @@ public class TemperatureSensorTask implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 double temperature = generateTemperature();
+                logger.info(() -> "Room=" + room.getRoomId() + " Temperature=" + temperature + "C");
+
 
                 AlertSeverity severity = null;
 

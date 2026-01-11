@@ -1,22 +1,31 @@
 package com.clinicalalertsystem.logging;
 
-import java.io.IOException;
-import java.util.logging.*;
+import java.io.InputStream;
+import java.util.logging.Logger;
 
-public class LogManager {
+public final class LogManager {
+
+    static {
+        try (InputStream config =
+                     LogManager.class
+                             .getClassLoader()
+                             .getResourceAsStream("logging.properties")) {
+
+            if (config != null) {
+                java.util.logging.LogManager.getLogManager().readConfiguration(config);
+            } else {
+                System.err.println("logging.properties not found, using defaults");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Failed to load logging configuration: " + e.getMessage());
+        }
+    }
+
+    private LogManager() {
+    }
 
     public static Logger getLogger(Class<?> clazz) {
-        Logger logger = Logger.getLogger(clazz.getName());
-        logger.setUseParentHandlers(false);
-
-        try {
-            Handler fileHandler = new FileHandler("clinical-alert-system.log", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            System.err.println("Failed to initialize logging: " + e.getMessage());
-        }
-
-        return logger;
+        return Logger.getLogger(clazz.getName());
     }
 }

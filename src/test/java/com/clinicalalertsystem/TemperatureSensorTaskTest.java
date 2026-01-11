@@ -1,11 +1,11 @@
 package com.clinicalalertsystem;
 
-import org.junit.jupiter.api.Test;
-
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import org.junit.jupiter.api.Test;
 
 class TemperatureSensorTaskTest {
 
@@ -38,4 +38,34 @@ class TemperatureSensorTaskTest {
         assertEquals(AlertSeverity.HIGH, alert.getSeverity());
         assertEquals("ICU-01", alert.getRoomId());
     }
+
+    @Test
+    void testCriticalTemperatureGeneratesCriticalAlert() throws Exception {
+        // Arrange
+        HospitalRoom room = new HospitalRoom("ICU-02", 18.0, 24.0);
+        BlockingQueue<Alert> queue = new LinkedBlockingQueue<>();
+
+        TemperatureSensorTask sensor = new TemperatureSensorTask(room, queue) {
+            @Override
+            protected double generateTemperature() {
+                return 35.0; // > max + 5 (29) → CRITICAL
+            }
+        };
+
+        Thread sensorThread = new Thread(sensor);
+
+        // Act
+        sensorThread.start();
+        Thread.sleep(100);
+        sensorThread.interrupt();
+        sensorThread.join();
+
+        // Assert
+        assertFalse(queue.isEmpty(), "Alert queue should contain a CRITICAL alert");
+
+        Alert alert = queue.take();
+        assertEquals(AlertSeverity.CRITICAL, alert.getSeverity());
+        assertEquals("ICU-02", alert.getRoomId());
+    }
+
 }

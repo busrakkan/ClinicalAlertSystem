@@ -3,6 +3,7 @@ package com.clinicalalertsystem;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
+
 import com.clinicalalertsystem.logging.LogManager;
 
 public class TemperatureSensorTask implements Runnable {
@@ -67,7 +68,7 @@ public class TemperatureSensorTask implements Runnable {
         }
     }
 
-    private double generateTemperature() {
+    protected double generateTemperature() {
         return 15 + random.nextDouble() * 20; // 15°C – 35°C
     }
 }

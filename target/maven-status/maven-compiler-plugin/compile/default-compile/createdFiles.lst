@@ -1,1 +1,8 @@
+com\clinicalalertsystem\NotificationDispatcher.class
+com\clinicalalertsystem\TemperatureSensorTask.class
+com\clinicalalertsystem\HospitalRoom.class
+com\clinicalalertsystem\AlertSeverity.class
+com\clinicalalertsystem\Alert.class
 com\clinicalalertsystem\Main.class
+com\clinicalalertsystem\logging\LogManager.class
+com\clinicalalertsystem\TemperatureReading.class

@@ -1,17 +1,13 @@
 package com.clinicalalertsystem;
 
-import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
-
 import com.clinicalalertsystem.logging.LogManager;
 
 public class NotificationDispatcher implements Runnable {
 
     private final BlockingQueue<Alert> alertQueue;
-    private final AtomicBoolean running = new AtomicBoolean(true);
+    private volatile boolean running = true;
 
     private static final Logger logger =
             LogManager.getLogger(NotificationDispatcher.class);
@@ -22,37 +18,36 @@ public class NotificationDispatcher implements Runnable {
 
     @Override
     public void run() {
-        while (running.get() && !Thread.currentThread().isInterrupted()) {
+        while (running && !Thread.currentThread().isInterrupted()) {
             try {
-                Alert alert = alertQueue.poll(500, TimeUnit.MILLISECONDS);
+                Alert alert = alertQueue.take();
 
-                if (alert != null) {
+                try {
                     handleAlert(alert);
+                } catch (Exception e) {
+                    // 🔥 FAULT ISOLATION HERE
+                    logger.severe("ALERT_HANDLER_FAILURE Room=" +
+                            alert.getRoomId() +
+                            " Error=" + e.getMessage());
+                    // continue processing next alerts
                 }
 
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // graceful shutdown
-            } catch (Exception e) {
-                logger.severe("DISPATCHER_FAILURE Error=" + e.getMessage());
+                Thread.currentThread().interrupt();
+                break;
             }
         }
     }
 
-    /**
-     * Hook method for processing alerts.
-     * Can be overridden in tests.
-     */
     protected void handleAlert(Alert alert) {
+        // Default behavior: log alert
         logger.warning(() ->
-                "ALERT_DISPATCHED " +
-                "Room=" + alert.getRoomId() +
-                " Temp=" + alert.getTemperature() + "C " +
-                "Severity=" + alert.getSeverity() +
-                " Time=" + Instant.now()
-        );
+                "ALERT_DISPATCHED Room=" + alert.getRoomId() +
+                " Severity=" + alert.getSeverity() +
+                " Temp=" + alert.getTemperature());
     }
 
     public void shutdown() {
-        running.set(false);
+        running = false;
     }
 }

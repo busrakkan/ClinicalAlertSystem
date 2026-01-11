@@ -1,14 +1,20 @@
 package com.clinicalalertsystem;
 
+import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
+
 import com.clinicalalertsystem.logging.LogManager;
 
 public class NotificationDispatcher implements Runnable {
 
     private final BlockingQueue<Alert> alertQueue;
-    private volatile boolean running = true;
-    private static final Logger logger = LogManager.getLogger(NotificationDispatcher.class);
+    private final AtomicBoolean running = new AtomicBoolean(true);
+
+    private static final Logger logger =
+            LogManager.getLogger(NotificationDispatcher.class);
 
     public NotificationDispatcher(BlockingQueue<Alert> alertQueue) {
         this.alertQueue = alertQueue;
@@ -16,41 +22,37 @@ public class NotificationDispatcher implements Runnable {
 
     @Override
     public void run() {
-        while (running || !alertQueue.isEmpty()) {
+        while (running.get() && !Thread.currentThread().isInterrupted()) {
             try {
-                // Take next alert (blocks if queue is empty)
-                Alert alert = alertQueue.take();
+                Alert alert = alertQueue.poll(500, TimeUnit.MILLISECONDS);
 
-                // Process alert (simulate notification)
-                processAlert(alert);
+                if (alert != null) {
+                    handleAlert(alert);
+                }
 
-                // Log alert dispatch
-                logger.severe(() -> "ALERT_DISPATCHED Room=" + alert.getRoomId() +
-                                    " Severity=" + alert.getSeverity() +
-                                    " Temperature=" + alert.getTemperature() +
-                                    " Time=" + alert.getTimestamp());
             } catch (InterruptedException e) {
-                // Graceful shutdown
-                Thread.currentThread().interrupt();
-                break;
+                Thread.currentThread().interrupt(); // graceful shutdown
             } catch (Exception e) {
-                // Fault isolation: one failed dispatch does not stop dispatcher
                 logger.severe("DISPATCHER_FAILURE Error=" + e.getMessage());
             }
         }
-        logger.info("NotificationDispatcher has shut down.");
     }
 
-    private void processAlert(Alert alert) {
-        // Here you could send emails, SMS, or trigger hospital system notifications
-        // For demo, we just print
-        System.out.println("[ALERT] Room: " + alert.getRoomId() +
-                           " | Temp: " + alert.getTemperature() +
-                           "°C | Severity: " + alert.getSeverity() +
-                           " | Time: " + alert.getTimestamp());
+    /**
+     * Hook method for processing alerts.
+     * Can be overridden in tests.
+     */
+    protected void handleAlert(Alert alert) {
+        logger.warning(() ->
+                "ALERT_DISPATCHED " +
+                "Room=" + alert.getRoomId() +
+                " Temp=" + alert.getTemperature() + "C " +
+                "Severity=" + alert.getSeverity() +
+                " Time=" + Instant.now()
+        );
     }
 
     public void shutdown() {
-        running = false;
+        running.set(false);
     }
 }

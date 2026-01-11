@@ -25,7 +25,7 @@ public class NotificationDispatcher implements Runnable {
                 try {
                     handleAlert(alert);
                 } catch (Exception e) {
-                    // 🔥 FAULT ISOLATION HERE
+                    // Fault Isolation
                     logger.severe("ALERT_HANDLER_FAILURE Room=" +
                             alert.getRoomId() +
                             " Error=" + e.getMessage());

@@ -5,6 +5,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 class TemperatureSensorTaskTest {
@@ -67,5 +68,31 @@ class TemperatureSensorTaskTest {
         assertEquals(AlertSeverity.CRITICAL, alert.getSeverity());
         assertEquals("ICU-02", alert.getRoomId());
     }
+
+    @Test
+    void testNormalTemperatureDoesNotGenerateAlert() throws Exception {
+        // Arrange
+        HospitalRoom room = new HospitalRoom("WARD-01", 16.0, 26.0);
+        BlockingQueue<Alert> queue = new LinkedBlockingQueue<>();
+
+        TemperatureSensorTask sensor = new TemperatureSensorTask(room, queue) {
+            @Override
+            protected double generateTemperature() {
+                return 22.0; // within safe range
+            }
+        };
+
+        Thread sensorThread = new Thread(sensor);
+
+        // Act
+        sensorThread.start();
+        Thread.sleep(100);
+        sensorThread.interrupt();
+        sensorThread.join();
+
+        // Assert
+        assertTrue(queue.isEmpty(), "No alert should be generated for normal temperature");
+    }
+
 
 }

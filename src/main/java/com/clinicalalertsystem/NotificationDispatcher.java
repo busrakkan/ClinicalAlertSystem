@@ -25,11 +25,9 @@ public class NotificationDispatcher implements Runnable {
                 try {
                     handleAlert(alert);
                 } catch (Exception e) {
-                    // Fault Isolation
                     logger.severe("ALERT_HANDLER_FAILURE Room=" +
                             alert.getRoomId() +
                             " Error=" + e.getMessage());
-                    // continue processing next alerts
                 }
 
             } catch (InterruptedException e) {
@@ -40,7 +38,6 @@ public class NotificationDispatcher implements Runnable {
     }
 
     protected void handleAlert(Alert alert) {
-        // Default behavior: log alert
         logger.warning(() ->
                 "ALERT_DISPATCHED Room=" + alert.getRoomId() +
                 " Severity=" + alert.getSeverity() +

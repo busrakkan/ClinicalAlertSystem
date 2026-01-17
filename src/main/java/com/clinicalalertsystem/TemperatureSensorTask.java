@@ -54,9 +54,8 @@ public class TemperatureSensorTask implements Runnable {
                 Thread.sleep(2000);
 
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // graceful shutdown
+                Thread.currentThread().interrupt(); 
             } catch (Exception e) {
-                // Fault isolation: one sensor failure does not stop others
                 logger.severe("SENSOR_FAILURE Room=" + room.getRoomId() +
                               " Error=" + e.getMessage());
             }

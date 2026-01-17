@@ -22,12 +22,10 @@ public class TemperatureSensorTask implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                // 1. Generate and log temperature reading
                 double temperature = generateTemperature();
                 logger.info(() -> "TEMP_READING Room=" + room.getRoomId() +
                                    " Temperature=" + temperature + "C");
 
-                // 2. Determine alert severity
                 AlertSeverity tempSeverity = null;
                 if (temperature > room.getMaxTemperature() + 5 ||
                     temperature < room.getMinTemperature() - 5) {
@@ -37,10 +35,8 @@ public class TemperatureSensorTask implements Runnable {
                     tempSeverity = AlertSeverity.HIGH;
                 }
 
-                // 3. Assign to a final variable for lambda usage
                 final AlertSeverity severity = tempSeverity;
 
-                // 4. Publish alert if needed
                 if (severity != null) {
                     Alert alert = new Alert(room.getRoomId(), temperature, severity);
                     boolean accepted = alertQueue.offer(alert);
@@ -55,7 +51,6 @@ public class TemperatureSensorTask implements Runnable {
                     }
                 }
 
-                // 5. Simulate sensor polling delay
                 Thread.sleep(2000);
 
             } catch (InterruptedException e) {
